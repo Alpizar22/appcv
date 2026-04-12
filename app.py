@@ -1396,7 +1396,7 @@ st.set_page_config(
     page_title="CV Analyzer / Analizador de CVs",
     page_icon="📄",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 # ── Session state defaults ────────────────────────────────────────────────────
