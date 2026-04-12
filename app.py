@@ -1475,6 +1475,14 @@ if not st.session_state.authenticated:
 # ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+/* ── Main content centering ── */
+.main .block-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
 /* ── Typography & base ── */
 html, body, [class*="css"] {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
