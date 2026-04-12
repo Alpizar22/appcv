@@ -1419,12 +1419,20 @@ for _k, _v in [
 
 # ── Sidebar: language toggle ──────────────────────────────────────────────────
 with st.sidebar:
-    current_lang = st.session_state.lang
-    other_lang   = "en" if current_lang == "es" else "es"
-    toggle_label = TEXTS[current_lang]["lang_toggle"]
-    if st.button(f"🌐 {toggle_label}", use_container_width=True):
-        st.session_state.lang = other_lang
-        st.rerun()
+    st.markdown("🌐 &nbsp;", unsafe_allow_html=True)
+    _col_es, _col_en = st.columns(2)
+    _active = "background:#2563eb;color:#fff;border-radius:6px;padding:4px 0;font-weight:600;font-size:0.85rem;border:none;width:100%;cursor:pointer"
+    _inactive = "background:#f1f5f9;color:#64748b;border-radius:6px;padding:4px 0;font-weight:500;font-size:0.85rem;border:1px solid #e2e8f0;width:100%;cursor:pointer"
+    with _col_es:
+        if st.button("ES", key="btn_lang_es", use_container_width=True,
+                     type="primary" if st.session_state.lang == "es" else "secondary"):
+            st.session_state.lang = "es"
+            st.rerun()
+    with _col_en:
+        if st.button("EN", key="btn_lang_en", use_container_width=True,
+                     type="primary" if st.session_state.lang == "en" else "secondary"):
+            st.session_state.lang = "en"
+            st.rerun()
 
 t = TEXTS[st.session_state.lang]  # shorthand for current translations
 
@@ -1584,38 +1592,37 @@ with st.sidebar:
     st.divider()
 
     _is_es = st.session_state.lang == "es"
-    st.caption("💬 " + ("¿Tienes sugerencias?" if _is_es else "Feedback?"))
-
-    feedback_msg = st.text_area(
-        label="feedback_input",
-        placeholder="Escribe tu sugerencia o reporte de bug…" if _is_es else "Write your suggestion or bug report…",
-        height=90,
-        key="feedback_msg",
-        label_visibility="collapsed",
-    )
-
-    if st.button(
-        "📨 Enviar" if _is_es else "📨 Send",
-        key="feedback_send_btn",
-        use_container_width=True,
-        disabled=not (feedback_msg or "").strip(),
-    ):
-        st.session_state.feedback_submitted = feedback_msg.strip()
-
-    if st.session_state.get("feedback_submitted"):
-        _subj = urllib.parse.quote(
-            "Sugerencia - Analizador de CVs con IA"
-            if _is_es else
-            "Feedback - AI CV Analyzer"
+    with st.expander("💬 " + ("¿Tienes sugerencias?" if _is_es else "Feedback?"), expanded=False):
+        feedback_msg = st.text_area(
+            label="feedback_input",
+            placeholder="Escribe tu sugerencia o reporte de bug…" if _is_es else "Write your suggestion or bug report…",
+            height=90,
+            key="feedback_msg",
+            label_visibility="collapsed",
         )
-        _body = urllib.parse.quote(st.session_state.feedback_submitted)
-        _mailto = f"mailto:{FEEDBACK_EMAIL}?subject={_subj}&body={_body}"
-        st.success("¡Gracias! Haz clic para abrir tu correo." if _is_es else "Thanks! Click to open your email.")
-        st.markdown(
-            f'<a href="{_mailto}" target="_blank" style="font-size:0.85rem;color:#2563eb">'
-            f'{"📧 Abrir correo" if _is_es else "📧 Open email"}</a>',
-            unsafe_allow_html=True,
-        )
+
+        if st.button(
+            "📨 Enviar" if _is_es else "📨 Send",
+            key="feedback_send_btn",
+            use_container_width=True,
+            disabled=not (feedback_msg or "").strip(),
+        ):
+            st.session_state.feedback_submitted = feedback_msg.strip()
+
+        if st.session_state.get("feedback_submitted"):
+            _subj = urllib.parse.quote(
+                "Sugerencia - Analizador de CVs con IA"
+                if _is_es else
+                "Feedback - AI CV Analyzer"
+            )
+            _body = urllib.parse.quote(st.session_state.feedback_submitted)
+            _mailto = f"mailto:{FEEDBACK_EMAIL}?subject={_subj}&body={_body}"
+            st.success("¡Gracias! Haz clic para abrir tu correo." if _is_es else "Thanks! Click to open your email.")
+            st.markdown(
+                f'<a href="{_mailto}" target="_blank" style="font-size:0.85rem;color:#2563eb">'
+                f'{"📧 Abrir correo" if _is_es else "📧 Open email"}</a>',
+                unsafe_allow_html=True,
+            )
 
 tab_single, tab_ranking, tab_improve = st.tabs(
     [t["mode_single"], t["mode_ranking"], t["mode_improve"]]
