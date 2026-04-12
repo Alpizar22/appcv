@@ -1,0 +1,13 @@
+.env
+.claude/
+keys.txt
+usage.json
+DejaVuSans.ttf
+DejaVuSans-Bold.ttf
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
