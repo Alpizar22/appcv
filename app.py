@@ -1567,9 +1567,11 @@ html, body, [class*="css"] {
 }
 
 /* ── Sidebar ── */
-[data-testid="stSidebar"] {
-    background: #f8fafc;
-    border-right: 1px solid #e5e7eb;
+[data-testid="stSidebar"],
+[data-testid="stSidebar"] > div:first-child,
+[data-testid="stSidebarContent"] {
+    background-color: #f8fafc !important;
+    border-right: 1px solid #e2e8f0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
