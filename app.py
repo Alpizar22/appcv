@@ -371,6 +371,13 @@ Respond in English. If a job description is included, adjust the score and analy
 # ── Access key helpers ─────────────────────────────────────────────────────────
 
 def _load_valid_keys() -> set:
+    # Production: read from Streamlit secrets
+    try:
+        raw = st.secrets["ACCESS_KEYS"]
+        return {line.strip() for line in raw.splitlines() if line.strip()}
+    except (KeyError, FileNotFoundError):
+        pass
+    # Local fallback: keys.txt
     if not os.path.exists(KEYS_FILE):
         return set()
     with open(KEYS_FILE, "r", encoding="utf-8") as fh:
