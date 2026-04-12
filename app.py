@@ -1413,6 +1413,7 @@ for _k, _v in [
     ("improve_result", None),    # dict from improve_cv()
     ("improve_pdf", None),       # bytes
     ("feedback_submitted", ""),  # last submitted feedback text
+    ("collapse_sidebar", False), # flag: colapsar sidebar tras login
 ]:
     if _k not in st.session_state:
         st.session_state[_k] = _v
@@ -1463,6 +1464,7 @@ if not st.session_state.authenticated:
             if status == "ok":
                 st.session_state.authenticated = True
                 st.session_state.access_key = key_input.strip()
+                st.session_state.collapse_sidebar = True  # colapsar sidebar tras login
                 st.rerun()
             elif status == "expired":
                 st.error(t["auth_error_expired"])
@@ -1471,6 +1473,19 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ── Main app (only reached when authenticated) ────────────────────────────────
+
+# Collapse sidebar on first render after login
+if st.session_state.get("collapse_sidebar"):
+    st.session_state.collapse_sidebar = False
+    import streamlit.components.v1 as components
+    components.html("""
+    <script>
+    setTimeout(function() {
+        const btn = window.parent.document.querySelector('[data-testid="collapsedControl"]');
+        if (btn) btn.click();
+    }, 120);
+    </script>
+    """, height=0, scrolling=False)
 
 # ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
