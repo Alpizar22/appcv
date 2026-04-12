@@ -5,6 +5,7 @@ Streamlit app para reclutadores usando Claude (Anthropic)
 import io
 import json
 import os
+import urllib.parse
 import urllib.request
 from typing import Optional
 
@@ -17,7 +18,8 @@ from PIL import Image, ImageDraw, ImageFont
 load_dotenv()
 
 MODEL = "claude-sonnet-4-20250514"
-GUMROAD_URL = "https://yourname.gumroad.com/l/your-product"  # ← actualiza esto / update this
+GUMROAD_URL    = "https://yourname.gumroad.com/l/your-product"  # ← actualiza esto / update this
+FEEDBACK_EMAIL = "Oscar_alpizar@hotmail.com"
 MAX_USES = 30
 
 APP_DIR    = os.path.dirname(os.path.abspath(__file__))
@@ -1410,6 +1412,7 @@ for _k, _v in [
     ("ranking_excel", None),     # bytes
     ("improve_result", None),    # dict from improve_cv()
     ("improve_pdf", None),       # bytes
+    ("feedback_submitted", ""),  # last submitted feedback text
 ]:
     if _k not in st.session_state:
         st.session_state[_k] = _v
@@ -1573,10 +1576,46 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Show remaining uses in sidebar
+# Show remaining uses + feedback in sidebar
 with st.sidebar:
     uses_left = key_uses_left(st.session_state.access_key)
     st.caption(f"{'Usos restantes' if st.session_state.lang == 'es' else 'Uses remaining'}: **{uses_left} / {MAX_USES}**")
+
+    st.divider()
+
+    _is_es = st.session_state.lang == "es"
+    st.caption("💬 " + ("¿Tienes sugerencias?" if _is_es else "Feedback?"))
+
+    feedback_msg = st.text_area(
+        label="feedback_input",
+        placeholder="Escribe tu sugerencia o reporte de bug…" if _is_es else "Write your suggestion or bug report…",
+        height=90,
+        key="feedback_msg",
+        label_visibility="collapsed",
+    )
+
+    if st.button(
+        "📨 Enviar" if _is_es else "📨 Send",
+        key="feedback_send_btn",
+        use_container_width=True,
+        disabled=not (feedback_msg or "").strip(),
+    ):
+        st.session_state.feedback_submitted = feedback_msg.strip()
+
+    if st.session_state.get("feedback_submitted"):
+        _subj = urllib.parse.quote(
+            "Sugerencia - Analizador de CVs con IA"
+            if _is_es else
+            "Feedback - AI CV Analyzer"
+        )
+        _body = urllib.parse.quote(st.session_state.feedback_submitted)
+        _mailto = f"mailto:{FEEDBACK_EMAIL}?subject={_subj}&body={_body}"
+        st.success("¡Gracias! Haz clic para abrir tu correo." if _is_es else "Thanks! Click to open your email.")
+        st.markdown(
+            f'<a href="{_mailto}" target="_blank" style="font-size:0.85rem;color:#2563eb">'
+            f'{"📧 Abrir correo" if _is_es else "📧 Open email"}</a>',
+            unsafe_allow_html=True,
+        )
 
 tab_single, tab_ranking, tab_improve = st.tabs(
     [t["mode_single"], t["mode_ranking"], t["mode_improve"]]
