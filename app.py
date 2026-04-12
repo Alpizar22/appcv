@@ -1395,7 +1395,7 @@ def recommendation_config(rec: str) -> tuple[str, str]:
 st.set_page_config(
     page_title="CV Analyzer / Analizador de CVs",
     page_icon="📄",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="collapsed",
 )
 
@@ -1454,10 +1454,10 @@ st.markdown("""
 <style>
 /* ── Main content centering ── */
 .main .block-container {
-    max-width: 900px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
 }
 
 /* ── Typography & base ── */
