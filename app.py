@@ -1396,7 +1396,7 @@ st.set_page_config(
     page_title="CV Analyzer / Analizador de CVs",
     page_icon="📄",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 # ── Session state defaults ────────────────────────────────────────────────────
@@ -1419,20 +1419,25 @@ for _k, _v in [
 
 # ── Sidebar: language toggle ──────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("🌐 &nbsp;", unsafe_allow_html=True)
+    st.markdown(
+        "<p style='color:#94b3d4;font-size:0.78rem;margin:0 0 6px 2px;letter-spacing:.05em'>🌐 IDIOMA / LANGUAGE</p>",
+        unsafe_allow_html=True,
+    )
     _col_es, _col_en = st.columns(2)
-    _active = "background:#2563eb;color:#fff;border-radius:6px;padding:4px 0;font-weight:600;font-size:0.85rem;border:none;width:100%;cursor:pointer"
-    _inactive = "background:#f1f5f9;color:#64748b;border-radius:6px;padding:4px 0;font-weight:500;font-size:0.85rem;border:1px solid #e2e8f0;width:100%;cursor:pointer"
     with _col_es:
         if st.button("ES", key="btn_lang_es", use_container_width=True,
                      type="primary" if st.session_state.lang == "es" else "secondary"):
-            st.session_state.lang = "es"
-            st.rerun()
+            if st.session_state.lang != "es":
+                st.session_state.lang = "es"
+                st.toast("✓ Idioma cambiado a Español")
+                st.rerun()
     with _col_en:
         if st.button("EN", key="btn_lang_en", use_container_width=True,
                      type="primary" if st.session_state.lang == "en" else "secondary"):
-            st.session_state.lang = "en"
-            st.rerun()
+            if st.session_state.lang != "en":
+                st.session_state.lang = "en"
+                st.toast("✓ Language changed to English")
+                st.rerun()
 
 t = TEXTS[st.session_state.lang]  # shorthand for current translations
 
@@ -1566,12 +1571,85 @@ html, body, [class*="css"] {
     border-radius: 10px !important;
 }
 
-/* ── Sidebar ── */
+/* ── Sidebar — dark blue theme ── */
 [data-testid="stSidebar"],
 [data-testid="stSidebar"] > div:first-child,
-[data-testid="stSidebarContent"] {
-    background-color: #f8fafc !important;
-    border-right: 1px solid #e2e8f0 !important;
+[data-testid="stSidebarContent"],
+section[data-testid="stSidebar"] {
+    background-color: #1e3a5f !important;
+    border-right: 1px solid #2d5a8e !important;
+    min-width: 230px !important;
+}
+/* Text */
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] .stMarkdown p {
+    color: #d1e3f8 !important;
+}
+/* Captions / small text */
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
+[data-testid="stSidebar"] small {
+    color: #7aabda !important;
+}
+/* Buttons — inactive (secondary) */
+[data-testid="stSidebar"] .stButton > button {
+    background: rgba(255,255,255,0.07) !important;
+    border: 1px solid rgba(255,255,255,0.22) !important;
+    color: #d1e3f8 !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+}
+[data-testid="stSidebar"] .stButton > button:hover {
+    background: rgba(255,255,255,0.14) !important;
+    border-color: rgba(255,255,255,0.45) !important;
+}
+/* Buttons — active (primary) */
+[data-testid="stSidebar"] .stButton > button[kind="primary"] {
+    background: #3b82f6 !important;
+    border: none !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.4) !important;
+}
+[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
+    background: #2563eb !important;
+}
+/* Expander */
+[data-testid="stSidebar"] [data-testid="stExpander"] {
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    border-radius: 10px !important;
+    background: rgba(255,255,255,0.05) !important;
+}
+[data-testid="stSidebar"] [data-testid="stExpander"] details summary p,
+[data-testid="stSidebar"] [data-testid="stExpander"] summary span {
+    color: #d1e3f8 !important;
+}
+[data-testid="stSidebar"] [data-testid="stExpander"] svg {
+    fill: #94b3d4 !important;
+    stroke: #94b3d4 !important;
+}
+/* Textarea */
+[data-testid="stSidebar"] textarea {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    color: #e8f1fb !important;
+    border-radius: 8px !important;
+    caret-color: #e8f1fb !important;
+}
+[data-testid="stSidebar"] textarea::placeholder {
+    color: #5a88b8 !important;
+}
+/* Divider */
+[data-testid="stSidebar"] hr {
+    border-color: rgba(255,255,255,0.12) !important;
+}
+/* Success alert */
+[data-testid="stSidebar"] [data-testid="stAlert"] {
+    background: rgba(52,211,153,0.15) !important;
+    border: 1px solid rgba(52,211,153,0.35) !important;
+}
+[data-testid="stSidebar"] [data-testid="stAlert"] p {
+    color: #a7f3d0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
