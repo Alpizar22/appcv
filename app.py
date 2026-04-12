@@ -1395,7 +1395,7 @@ def recommendation_config(rec: str) -> tuple[str, str]:
 st.set_page_config(
     page_title="CV Analyzer / Analizador de CVs",
     page_icon="📄",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="collapsed",
 )
 
@@ -1412,33 +1412,9 @@ for _k, _v in [
     ("ranking_excel", None),     # bytes
     ("improve_result", None),    # dict from improve_cv()
     ("improve_pdf", None),       # bytes
-    ("feedback_submitted", ""),  # last submitted feedback text
-    ("collapse_sidebar", False), # flag: colapsar sidebar tras login
 ]:
     if _k not in st.session_state:
         st.session_state[_k] = _v
-
-# ── Sidebar: language toggle ──────────────────────────────────────────────────
-with st.sidebar:
-    st.markdown(
-        "<p style='color:#94b3d4;font-size:0.78rem;margin:0 0 6px 2px;letter-spacing:.05em'>🌐 IDIOMA / LANGUAGE</p>",
-        unsafe_allow_html=True,
-    )
-    _col_es, _col_en = st.columns(2)
-    with _col_es:
-        if st.button("ES", key="btn_lang_es", use_container_width=True,
-                     type="primary" if st.session_state.lang == "es" else "secondary"):
-            if st.session_state.lang != "es":
-                st.session_state.lang = "es"
-                st.toast("✓ Idioma cambiado a Español")
-                st.rerun()
-    with _col_en:
-        if st.button("EN", key="btn_lang_en", use_container_width=True,
-                     type="primary" if st.session_state.lang == "en" else "secondary"):
-            if st.session_state.lang != "en":
-                st.session_state.lang = "en"
-                st.toast("✓ Language changed to English")
-                st.rerun()
 
 t = TEXTS[st.session_state.lang]  # shorthand for current translations
 
@@ -1464,7 +1440,6 @@ if not st.session_state.authenticated:
             if status == "ok":
                 st.session_state.authenticated = True
                 st.session_state.access_key = key_input.strip()
-                st.session_state.collapse_sidebar = True  # colapsar sidebar tras login
                 st.rerun()
             elif status == "expired":
                 st.error(t["auth_error_expired"])
@@ -1473,19 +1448,6 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ── Main app (only reached when authenticated) ────────────────────────────────
-
-# Collapse sidebar on first render after login
-if st.session_state.get("collapse_sidebar"):
-    st.session_state.collapse_sidebar = False
-    import streamlit.components.v1 as components
-    components.html("""
-    <script>
-    setTimeout(function() {
-        const btn = window.parent.document.querySelector('[data-testid="collapsedControl"]');
-        if (btn) btn.click();
-    }, 120);
-    </script>
-    """, height=0, scrolling=False)
 
 # ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -1593,132 +1555,72 @@ html, body, [class*="css"] {
     border: 1px solid #e5e7eb !important;
     border-radius: 10px !important;
 }
-
-/* ── Sidebar — dark blue theme ── */
-[data-testid="stSidebar"],
-[data-testid="stSidebar"] > div:first-child,
-[data-testid="stSidebarContent"],
-section[data-testid="stSidebar"] {
-    background-color: #1e3a5f !important;
-    border-right: 1px solid #2d5a8e !important;
-    min-width: 230px !important;
-}
-/* Text */
-[data-testid="stSidebar"] p,
-[data-testid="stSidebar"] span,
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] .stMarkdown p {
-    color: #d1e3f8 !important;
-}
-/* Captions / small text */
-[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
-[data-testid="stSidebar"] small {
-    color: #7aabda !important;
-}
-/* Buttons — inactive (secondary) */
-[data-testid="stSidebar"] .stButton > button {
-    background: rgba(255,255,255,0.07) !important;
-    border: 1px solid rgba(255,255,255,0.22) !important;
-    color: #d1e3f8 !important;
-    border-radius: 8px !important;
-    font-weight: 500 !important;
-}
-[data-testid="stSidebar"] .stButton > button:hover {
-    background: rgba(255,255,255,0.14) !important;
-    border-color: rgba(255,255,255,0.45) !important;
-}
-/* Buttons — active (primary) */
-[data-testid="stSidebar"] .stButton > button[kind="primary"] {
-    background: #3b82f6 !important;
-    border: none !important;
-    color: #ffffff !important;
-    box-shadow: 0 2px 8px rgba(59,130,246,0.4) !important;
-}
-[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
-    background: #2563eb !important;
-}
-/* Expander */
-[data-testid="stSidebar"] [data-testid="stExpander"] {
-    border: 1px solid rgba(255,255,255,0.15) !important;
-    border-radius: 10px !important;
-    background: rgba(255,255,255,0.05) !important;
-}
-[data-testid="stSidebar"] [data-testid="stExpander"] details summary p,
-[data-testid="stSidebar"] [data-testid="stExpander"] summary span {
-    color: #d1e3f8 !important;
-}
-[data-testid="stSidebar"] [data-testid="stExpander"] svg {
-    fill: #94b3d4 !important;
-    stroke: #94b3d4 !important;
-}
-/* Textarea */
-[data-testid="stSidebar"] textarea {
-    background: rgba(255,255,255,0.08) !important;
-    border: 1px solid rgba(255,255,255,0.2) !important;
-    color: #e8f1fb !important;
-    border-radius: 8px !important;
-    caret-color: #e8f1fb !important;
-}
-[data-testid="stSidebar"] textarea::placeholder {
-    color: #5a88b8 !important;
-}
-/* Divider */
-[data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.12) !important;
-}
-/* Success alert */
-[data-testid="stSidebar"] [data-testid="stAlert"] {
-    background: rgba(52,211,153,0.15) !important;
-    border: 1px solid rgba(52,211,153,0.35) !important;
-}
-[data-testid="stSidebar"] [data-testid="stAlert"] p {
-    color: #a7f3d0 !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
-# ── Header ────────────────────────────────────────────────────────────────────
-_subtitle_clean = t["page_subtitle"].replace("*", "")
-st.markdown(
-    f"""<div class="cv-header">
-        <h1>📄 {t['page_title']}</h1>
-        <p>{_subtitle_clean}</p>
-    </div>""",
-    unsafe_allow_html=True,
-)
+# ── Header + inline language toggle ──────────────────────────────────────────
+_hdr_col, _lang_col = st.columns([6, 1])
+with _hdr_col:
+    _subtitle_clean = t["page_subtitle"].replace("*", "")
+    st.markdown(
+        f"""<div class="cv-header">
+            <h1>📄 {t['page_title']}</h1>
+            <p>{_subtitle_clean}</p>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+with _lang_col:
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+    _l1, _l2 = st.columns(2)
+    with _l1:
+        if st.button("ES", key="btn_lang_es",
+                     type="primary" if st.session_state.lang == "es" else "secondary",
+                     use_container_width=True):
+            if st.session_state.lang != "es":
+                st.session_state.lang = "es"
+                st.toast("✓ Idioma cambiado a Español")
+                st.rerun()
+    with _l2:
+        if st.button("EN", key="btn_lang_en",
+                     type="primary" if st.session_state.lang == "en" else "secondary",
+                     use_container_width=True):
+            if st.session_state.lang != "en":
+                st.session_state.lang = "en"
+                st.toast("✓ Language changed to English")
+                st.rerun()
 
-# Show remaining uses + feedback in sidebar
-with st.sidebar:
-    uses_left = key_uses_left(st.session_state.access_key)
-    st.caption(f"{'Usos restantes' if st.session_state.lang == 'es' else 'Uses remaining'}: **{uses_left} / {MAX_USES}**")
 
-    st.divider()
-
+# ── Feedback helper (rendered at bottom of every tab) ────────────────────────
+def _render_feedback(texts: dict, tab_key: str) -> None:
     _is_es = st.session_state.lang == "es"
+    uses_left = key_uses_left(st.session_state.access_key)
+    st.markdown(
+        f"<p style='font-size:0.8rem;color:#9ca3af;text-align:right;margin:0'>"
+        f"{'Usos restantes' if _is_es else 'Uses remaining'}: "
+        f"<strong>{uses_left} / {MAX_USES}</strong></p>",
+        unsafe_allow_html=True,
+    )
+    _submitted_key = f"feedback_submitted_{tab_key}"
     with st.expander("💬 " + ("¿Tienes sugerencias?" if _is_es else "Feedback?"), expanded=False):
         feedback_msg = st.text_area(
             label="feedback_input",
             placeholder="Escribe tu sugerencia o reporte de bug…" if _is_es else "Write your suggestion or bug report…",
             height=90,
-            key="feedback_msg",
+            key=f"feedback_msg_{tab_key}",
             label_visibility="collapsed",
         )
-
         if st.button(
             "📨 Enviar" if _is_es else "📨 Send",
-            key="feedback_send_btn",
+            key=f"feedback_send_{tab_key}",
             use_container_width=True,
             disabled=not (feedback_msg or "").strip(),
         ):
-            st.session_state.feedback_submitted = feedback_msg.strip()
-
-        if st.session_state.get("feedback_submitted"):
+            st.session_state[_submitted_key] = feedback_msg.strip()
+        if st.session_state.get(_submitted_key):
             _subj = urllib.parse.quote(
-                "Sugerencia - Analizador de CVs con IA"
-                if _is_es else
-                "Feedback - AI CV Analyzer"
+                "Sugerencia - Analizador de CVs con IA" if _is_es else "Feedback - AI CV Analyzer"
             )
-            _body = urllib.parse.quote(st.session_state.feedback_submitted)
+            _body = urllib.parse.quote(st.session_state[_submitted_key])
             _mailto = f"mailto:{FEEDBACK_EMAIL}?subject={_subj}&body={_body}"
             st.success("¡Gracias! Haz clic para abrir tu correo." if _is_es else "Thanks! Click to open your email.")
             st.markdown(
@@ -1726,6 +1628,7 @@ with st.sidebar:
                 f'{"📧 Abrir correo" if _is_es else "📧 Open email"}</a>',
                 unsafe_allow_html=True,
             )
+
 
 tab_single, tab_ranking, tab_improve = st.tabs(
     [t["mode_single"], t["mode_ranking"], t["mode_improve"]]
@@ -1912,6 +1815,9 @@ with tab_single:
 
             with st.expander(t["json_expander"]):
                 st.json(result)
+
+    st.divider()
+    _render_feedback(t, "single")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -2132,6 +2038,9 @@ with tab_ranking:
                                 for f in flags:
                                     st.warning(f"⚠ {f}")
 
+    st.divider()
+    _render_feedback(t, "ranking")
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3 — Improve your CV
@@ -2285,3 +2194,6 @@ with tab_improve:
                 use_container_width=True,
                 type="primary",
             )
+
+    st.divider()
+    _render_feedback(t, "improve")
