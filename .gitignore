@@ -1,4 +1,5 @@
 .env
+secrets_example.toml
 .claude/
 keys.txt
 usage.json

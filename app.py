@@ -486,23 +486,74 @@ If a job description is included, focus improvements and keywords on that specif
 }
 
 
+# ── Google Sheets key helpers ──────────────────────────────────────────────────
+# Sheet columns (row 1 = header): clave | usos_restantes | email_comprador
+
+def _gspread_client():
+    """Return an authenticated gspread client, or None if credentials are missing."""
+    try:
+        import gspread
+        from google.oauth2.service_account import Credentials
+    except ImportError:
+        return None
+
+    creds_json = (
+        os.getenv("GOOGLE_CREDENTIALS_JSON")
+        or st.secrets.get("GOOGLE_CREDENTIALS_JSON", "")
+    )
+    if not creds_json:
+        return None
+    try:
+        creds_dict = json.loads(creds_json)
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive.readonly",
+        ]
+        creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        return gspread.authorize(creds)
+    except Exception:
+        return None
+
+
+@st.cache_resource(ttl=120)
+def _get_sheet():
+    """Return the gspread Worksheet, cached for 2 minutes."""
+    client = _gspread_client()
+    if client is None:
+        return None
+    sheet_id = os.getenv("GOOGLE_SHEET_ID") or st.secrets.get("GOOGLE_SHEET_ID", "")
+    if not sheet_id:
+        return None
+    try:
+        spreadsheet = client.open_by_key(sheet_id)
+        return spreadsheet.worksheet("claves")
+    except Exception:
+        return None
+
+
+def _sheet_row_for_key(ws, key: str):
+    """Return (row_index, usos_restantes) for key, or (None, None) if not found."""
+    try:
+        cell = ws.find(key, in_column=1)
+        if cell is None:
+            return None, None
+        usos = ws.cell(cell.row, 2).value
+        return cell.row, int(usos) if usos is not None else 0
+    except Exception:
+        return None, None
+
+
 # ── Access key helpers ─────────────────────────────────────────────────────────
 
-def _load_valid_keys() -> set:
-    # Production: read from Streamlit secrets
-    try:
-        raw = st.secrets["ACCESS_KEYS"]
-        return {line.strip() for line in raw.splitlines() if line.strip()}
-    except (KeyError, FileNotFoundError):
-        pass
-    # Local fallback: keys.txt
+def _load_valid_keys_local() -> set:
+    """Fallback: load keys from keys.txt (local dev)."""
     if not os.path.exists(KEYS_FILE):
         return set()
     with open(KEYS_FILE, "r", encoding="utf-8") as fh:
         return {line.strip() for line in fh if line.strip()}
 
 
-def _load_usage() -> dict:
+def _load_usage_local() -> dict:
     if not os.path.exists(USAGE_FILE):
         return {}
     try:
@@ -513,33 +564,52 @@ def _load_usage() -> dict:
         return {}
 
 
-def _save_usage(usage: dict) -> None:
+def _save_usage_local(usage: dict) -> None:
     try:
         with open(USAGE_FILE, "w", encoding="utf-8") as fh:
             json.dump(usage, fh, indent=2)
     except OSError:
-        pass  # Ephemeral filesystem (Streamlit Cloud) — usage not persisted across restarts
+        pass
 
 
 def validate_key(key: str) -> str:
-    """Return 'ok', 'invalid', or 'expired'."""
-    if key not in _load_valid_keys():
+    """Return 'ok', 'invalid', or 'expired'. Uses Google Sheets when configured."""
+    ws = _get_sheet()
+    if ws is not None:
+        row, usos = _sheet_row_for_key(ws, key)
+        if row is None:
+            return "invalid"
+        return "ok" if usos > 0 else "expired"
+
+    # ── Local fallback ──
+    if key not in _load_valid_keys_local():
         return "invalid"
-    usage = _load_usage()
-    if usage.get(key, 0) >= MAX_USES:
-        return "expired"
-    return "ok"
+    usage = _load_usage_local()
+    return "expired" if usage.get(key, 0) >= MAX_USES else "ok"
 
 
 def consume_key(key: str) -> None:
-    """Increment use count for the given key."""
-    usage = _load_usage()
+    """Decrement usos_restantes for the given key."""
+    ws = _get_sheet()
+    if ws is not None:
+        row, usos = _sheet_row_for_key(ws, key)
+        if row is not None and usos > 0:
+            ws.update_cell(row, 2, usos - 1)
+        return
+
+    # ── Local fallback ──
+    usage = _load_usage_local()
     usage[key] = usage.get(key, 0) + 1
-    _save_usage(usage)
+    _save_usage_local(usage)
 
 
 def key_uses_left(key: str) -> int:
-    usage = _load_usage()
+    ws = _get_sheet()
+    if ws is not None:
+        _, usos = _sheet_row_for_key(ws, key)
+        return max(0, usos or 0)
+
+    usage = _load_usage_local()
     return max(0, MAX_USES - usage.get(key, 0))
 
 
