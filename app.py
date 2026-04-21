@@ -540,7 +540,13 @@ def _get_sheet():
         )
         return ws
     except Exception as e:
-        st.sidebar.error(f"🔴 DEBUG _get_sheet exception: {e}")
+        import traceback
+        st.sidebar.error(
+            f"🔴 DEBUG _get_sheet exception\n"
+            f"type: {type(e).__name__}\n"
+            f"str(e): {str(e)}\n"
+            f"traceback:\n{traceback.format_exc()}"
+        )
         return None
 
 
