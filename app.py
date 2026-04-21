@@ -1454,10 +1454,10 @@ def generate_ranking_excel(ranked: list, job_description: str, t: dict) -> bytes
 
 def recommendation_config(rec: str) -> tuple[str, str]:
     return {
-        "CONTRATAR":   ("🟢", "#28a745"),
-        "ENTREVISTAR": ("🟡", "#ffc107"),
-        "DESCARTAR":   ("🔴", "#dc3545"),
-    }.get(rec.upper(), ("⚪", "#6c757d"))
+        "CONTRATAR":   ("🟢", "#10B981"),
+        "ENTREVISTAR": ("🟡", "#F59E0B"),
+        "DESCARTAR":   ("🔴", "#EF4444"),
+    }.get(rec.upper(), ("⚪", "#94A3B8"))
 
 
 # ── Streamlit App ─────────────────────────────────────────────────────────────
@@ -1522,36 +1522,43 @@ if not st.session_state.authenticated:
 # ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* ── Base / Dark mode ── */
+html, body, [class*="css"], .stApp {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    background-color: #0F172A !important;
+    color: #F8FAFC !important;
+}
+
 /* ── Main content centering ── */
 .main .block-container {
     max-width: 1100px;
     margin: 0 auto;
     padding-left: 3rem;
     padding-right: 3rem;
-}
-
-/* ── Typography & base ── */
-html, body, [class*="css"] {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #0F172A !important;
 }
 
 /* ── Header banner ── */
 .cv-header {
-    background: linear-gradient(135deg, #1e40af 0%, #2563eb 60%, #3b82f6 100%);
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
     border-radius: 14px;
     padding: 24px 32px 20px 32px;
     margin-bottom: 8px;
-    box-shadow: 0 4px 20px rgba(37,99,235,0.18);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 .cv-header h1 {
-    color: #ffffff;
+    color: #F8FAFC;
     font-size: 1.75rem;
     font-weight: 700;
     margin: 0 0 4px 0;
     letter-spacing: -0.3px;
 }
+.cv-header h1 .accent { color: #6366F1; }
 .cv-header p {
-    color: rgba(255,255,255,0.82);
+    color: #94A3B8;
     font-size: 0.92rem;
     margin: 0;
 }
@@ -1559,71 +1566,164 @@ html, body, [class*="css"] {
 /* ── Tabs ── */
 .stTabs [data-baseweb="tab-list"] {
     gap: 6px;
-    border-bottom: 2px solid #e5e7eb;
+    border-bottom: 1px solid rgba(148,163,184,0.2);
     padding-bottom: 0;
+    background: transparent !important;
 }
 .stTabs [data-baseweb="tab"] {
     font-size: 0.9rem;
     font-weight: 500;
     padding: 8px 18px;
     border-radius: 8px 8px 0 0;
-    color: #6b7280;
+    color: #94A3B8 !important;
     border: none;
-    background: transparent;
+    background: transparent !important;
 }
 .stTabs [aria-selected="true"] {
-    color: #2563eb !important;
-    background: #eff6ff !important;
-    border-bottom: 2px solid #2563eb !important;
+    color: #F8FAFC !important;
+    background: rgba(99,102,241,0.1) !important;
+    border-bottom: 2px solid #6366F1 !important;
 }
 
 /* ── Metric cards ── */
 [data-testid="stMetric"] {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 14px 18px;
+    background: rgba(99,102,241,0.1) !important;
+    border: 1px solid rgba(99,102,241,0.2) !important;
+    border-radius: 12px !important;
+    padding: 14px 18px !important;
+    backdrop-filter: blur(10px) !important;
 }
 [data-testid="stMetricValue"] {
     font-size: 1.6rem !important;
     font-weight: 700 !important;
-    color: #1e293b !important;
+    color: #F8FAFC !important;
 }
+[data-testid="stMetricLabel"] { color: #94A3B8 !important; }
+[data-testid="stMetricDelta"] { color: #10B981 !important; }
 
-/* ── Containers / cards ── */
+/* ── Glass containers / cards ── */
 [data-testid="stVerticalBlockBorderWrapper"] > div {
     border-radius: 12px !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.06) !important;
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.2) !important;
 }
 
 /* ── Buttons ── */
 .stButton > button, .stDownloadButton > button {
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     font-weight: 500 !important;
-    transition: all 0.15s ease !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    transition: all 0.2s ease !important;
 }
 .stButton > button[kind="primary"], .stDownloadButton > button {
-    background: #2563eb !important;
+    background: #6366F1 !important;
     border: none !important;
     color: white !important;
 }
 .stButton > button[kind="primary"]:hover, .stDownloadButton > button:hover {
-    background: #1d4ed8 !important;
-    box-shadow: 0 4px 12px rgba(37,99,235,0.3) !important;
+    background: #4F46E5 !important;
+    box-shadow: 0 0 20px rgba(99,102,241,0.4) !important;
     transform: translateY(-1px) !important;
+}
+.stButton > button[kind="secondary"] {
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(148,163,184,0.3) !important;
+    color: #94A3B8 !important;
+}
+.stButton > button[kind="secondary"]:hover {
+    background: rgba(99,102,241,0.1) !important;
+    border-color: #6366F1 !important;
+    color: #F8FAFC !important;
 }
 
 /* ── Progress bar ── */
 [data-testid="stProgressBar"] > div {
-    border-radius: 6px;
-    height: 8px;
+    background: rgba(255,255,255,0.1) !important;
+    border-radius: 4px !important;
+    height: 8px !important;
+}
+[data-testid="stProgressBar"] > div > div {
+    background: linear-gradient(90deg, #6366F1, #10B981) !important;
+    border-radius: 4px !important;
 }
 
 /* ── Expander ── */
 [data-testid="stExpander"] {
-    border: 1px solid #e5e7eb !important;
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(148,163,184,0.2) !important;
     border-radius: 10px !important;
+    backdrop-filter: blur(10px) !important;
+}
+[data-testid="stExpander"] summary { color: #F8FAFC !important; }
+[data-testid="stExpander"] summary:hover { color: #6366F1 !important; }
+
+/* ── Text inputs and text areas ── */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea {
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(148,163,184,0.2) !important;
+    border-radius: 10px !important;
+    color: #F8FAFC !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color: #6366F1 !important;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.2) !important;
+}
+.stTextInput label, .stTextArea label { color: #94A3B8 !important; }
+
+/* ── File uploader / dropzone ── */
+[data-testid="stFileUploader"] {
+    background: rgba(99,102,241,0.05) !important;
+    border: 2px dashed rgba(99,102,241,0.4) !important;
+    border-radius: 12px !important;
+}
+[data-testid="stFileUploader"]:hover {
+    border-color: #6366F1 !important;
+    background: rgba(99,102,241,0.1) !important;
+}
+
+/* ── Alerts ── */
+[data-testid="stAlert"] {
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(148,163,184,0.2) !important;
+    border-radius: 10px !important;
+    color: #F8FAFC !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* ── Dataframe ── */
+[data-testid="stDataFrame"] {
+    background: rgba(255,255,255,0.05) !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+}
+
+/* ── Dividers ── */
+hr { border-color: rgba(148,163,184,0.2) !important; }
+
+/* ── Headings ── */
+h1, h2, h3, .stMarkdown h2, .stMarkdown h3 { color: #F8FAFC !important; }
+
+/* ── Captions ── */
+.stCaption, [data-testid="stCaptionContainer"] { color: #94A3B8 !important; }
+
+/* ── Form ── */
+.stForm {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 14px !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* ── Select boxes ── */
+[data-baseweb="select"] > div {
+    background: rgba(255,255,255,0.05) !important;
+    border-color: rgba(148,163,184,0.2) !important;
+    color: #F8FAFC !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1665,7 +1765,7 @@ def _render_feedback(texts: dict, tab_key: str) -> None:
     _is_es = st.session_state.lang == "es"
     uses_left = key_uses_left(st.session_state.access_key)
     st.markdown(
-        f"<p style='font-size:0.8rem;color:#9ca3af;text-align:right;margin:0'>"
+        f"<p style='font-size:0.8rem;color:#94A3B8;text-align:right;margin:0'>"
         f"{'Usos restantes' if _is_es else 'Uses remaining'}: "
         f"<strong>{uses_left} / {MAX_USES}</strong></p>",
         unsafe_allow_html=True,
@@ -1694,7 +1794,7 @@ def _render_feedback(texts: dict, tab_key: str) -> None:
             _mailto = f"mailto:{FEEDBACK_EMAIL}?subject={_subj}&body={_body}"
             st.success("¡Gracias! Haz clic para abrir tu correo." if _is_es else "Thanks! Click to open your email.")
             st.markdown(
-                f'<a href="{_mailto}" target="_blank" style="font-size:0.85rem;color:#2563eb">'
+                f'<a href="{_mailto}" target="_blank" style="font-size:0.85rem;color:#6366F1">'
                 f'{"📧 Abrir correo" if _is_es else "📧 Open email"}</a>',
                 unsafe_allow_html=True,
             )
@@ -1767,7 +1867,7 @@ with tab_single:
 
         if result is None:
             st.markdown(
-                f"<br><div style='text-align:center;color:gray;font-size:1.1rem'>"
+                f"<br><div style='text-align:center;color:#94A3B8;font-size:1.1rem'>"
                 f"{t['no_results']}</div>",
                 unsafe_allow_html=True,
             )
@@ -1804,9 +1904,11 @@ with tab_single:
                 st.metric(t["score_label"], f"{score} / 100")
                 st.progress(score / 100)
             with c2:
+                _rec_bg = {"CONTRATAR": "rgba(16,185,129,0.15)", "ENTREVISTAR": "rgba(245,158,11,0.15)", "DESCARTAR": "rgba(239,68,68,0.15)"}.get(rec_raw, "rgba(148,163,184,0.15)")
                 st.markdown(
-                    f"<div style='font-size:.9rem;color:gray;margin-bottom:4px'>{t['rec_label']}</div>"
-                    f"<div style='font-size:1.5rem;font-weight:700;color:{color}'>{emoji} {rec_display}</div>",
+                    f"<div style='font-size:.9rem;color:#94A3B8;margin-bottom:8px'>{t['rec_label']}</div>"
+                    f"<div style='display:inline-block;padding:6px 18px;border-radius:20px;"
+                    f"background:{_rec_bg};color:{color};font-size:1.1rem;font-weight:700'>{emoji} {rec_display}</div>",
                     unsafe_allow_html=True,
                 )
 
@@ -1982,16 +2084,16 @@ with tab_ranking:
 
         if not ranked:
             st.markdown(
-                f"<br><div style='text-align:center;color:gray;font-size:1.1rem'>"
+                f"<br><div style='text-align:center;color:#94A3B8;font-size:1.1rem'>"
                 f"{t['rank_no_results']}</div>",
                 unsafe_allow_html=True,
             )
         else:
             MEDALS = {1: "🥇", 2: "🥈", 3: "🥉"}
             REC_COLORS_UI = {
-                "CONTRATAR":   "#28a745", "HIRE":      "#28a745",
-                "ENTREVISTAR": "#e6a817", "INTERVIEW": "#e6a817",
-                "DESCARTAR":   "#dc3545", "DISCARD":   "#dc3545",
+                "CONTRATAR":   "#10B981", "HIRE":      "#10B981",
+                "ENTREVISTAR": "#F59E0B", "INTERVIEW": "#F59E0B",
+                "DESCARTAR":   "#EF4444", "DISCARD":   "#EF4444",
             }
 
             st.markdown(t["rank_results_header"])
@@ -2064,9 +2166,11 @@ with tab_ranking:
                     with d1:
                         st.metric(t["score_label"], f"{score} / 100")
                         st.progress(score / 100)
+                        _rec_bg_r = {"CONTRATAR": "rgba(16,185,129,0.15)", "ENTREVISTAR": "rgba(245,158,11,0.15)", "DESCARTAR": "rgba(239,68,68,0.15)"}.get(rec_raw, "rgba(148,163,184,0.15)")
                         st.markdown(
-                            f"<div style='font-size:.85rem;color:gray'>{t['rec_label']}</div>"
-                            f"<div style='font-size:1.2rem;font-weight:700;color:{rec_col}'>"
+                            f"<div style='font-size:.85rem;color:#94A3B8;margin-bottom:6px'>{t['rec_label']}</div>"
+                            f"<div style='display:inline-block;padding:4px 14px;border-radius:20px;"
+                            f"background:{_rec_bg_r};color:{rec_col};font-size:1rem;font-weight:700'>"
                             f"{emoji_r} {rec_dis}</div>",
                             unsafe_allow_html=True,
                         )
@@ -2171,7 +2275,7 @@ with tab_improve:
 
         if impr_result is None:
             st.markdown(
-                f"<br><div style='text-align:center;color:gray;font-size:1.1rem'>"
+                f"<br><div style='text-align:center;color:#94A3B8;font-size:1.1rem'>"
                 f"{t['impr_no_results']}</div>",
                 unsafe_allow_html=True,
             )
@@ -2190,21 +2294,21 @@ with tab_improve:
                 sc1, sc2 = st.columns(2)
                 with sc1:
                     st.metric(t["impr_score_before"], f"{score_antes} / 100")
-                    sc_color_b = "#28a745" if score_antes >= 75 else "#e6a817" if score_antes >= 50 else "#dc3545"
+                    sc_color_b = "#10B981" if score_antes >= 75 else "#F59E0B" if score_antes >= 50 else "#EF4444"
                     st.markdown(
-                        f"<div style='height:8px;border-radius:6px;background:#e5e7eb;margin-top:-8px'>"
-                        f"<div style='width:{score_antes}%;height:100%;border-radius:6px;"
-                        f"background:{sc_color_b}'></div></div>",
+                        f"<div style='height:8px;border-radius:6px;background:rgba(255,255,255,0.1);margin-top:-8px'>"
+                        f"<div style='width:{score_antes}%;height:100%;border-radius:4px;"
+                        f"background:linear-gradient(90deg,#6366F1,{sc_color_b})'></div></div>",
                         unsafe_allow_html=True,
                     )
                 with sc2:
                     delta_str = f"+{gain}" if gain >= 0 else str(gain)
                     st.metric(t["impr_score_after"], f"{score_despues} / 100", delta=delta_str)
-                    sc_color_a = "#28a745" if score_despues >= 75 else "#e6a817" if score_despues >= 50 else "#dc3545"
+                    sc_color_a = "#10B981" if score_despues >= 75 else "#F59E0B" if score_despues >= 50 else "#EF4444"
                     st.markdown(
-                        f"<div style='height:8px;border-radius:6px;background:#e5e7eb;margin-top:-8px'>"
-                        f"<div style='width:{score_despues}%;height:100%;border-radius:6px;"
-                        f"background:{sc_color_a}'></div></div>",
+                        f"<div style='height:8px;border-radius:6px;background:rgba(255,255,255,0.1);margin-top:-8px'>"
+                        f"<div style='width:{score_despues}%;height:100%;border-radius:4px;"
+                        f"background:linear-gradient(90deg,#6366F1,{sc_color_a})'></div></div>",
                         unsafe_allow_html=True,
                     )
 
@@ -2223,9 +2327,9 @@ with tab_improve:
                 with st.expander(f"**{i}. {titulo}**", expanded=(i == 1)):
                     st.markdown(desc)
                     st.markdown(
-                        f"<div style='background:#eff6ff;border-left:3px solid #2563eb;"
+                        f"<div style='background:rgba(99,102,241,0.12);border-left:3px solid #6366F1;"
                         f"border-radius:0 8px 8px 0;padding:10px 14px;margin-top:8px;"
-                        f"font-size:0.9rem'>"
+                        f"font-size:0.9rem;color:#F8FAFC'>"
                         f"<strong>{t['impr_accion_label']}</strong> {accion}</div>",
                         unsafe_allow_html=True,
                     )
@@ -2242,9 +2346,9 @@ with tab_improve:
                     if keywords:
                         st.markdown(t["impr_keywords_header"])
                         kw_html = " ".join(
-                            f"<span style='display:inline-block;background:#fef3c7;"
-                            f"border:1px solid #fbbf24;border-radius:20px;"
-                            f"padding:2px 10px;margin:3px;font-size:0.85rem'>{kw}</span>"
+                            f"<span style='display:inline-block;background:rgba(245,158,11,0.15);"
+                            f"border:1px solid rgba(245,158,11,0.4);border-radius:20px;"
+                            f"padding:2px 10px;margin:3px;font-size:0.85rem;color:#F59E0B'>{kw}</span>"
                             for kw in keywords
                         )
                         st.markdown(kw_html, unsafe_allow_html=True)
