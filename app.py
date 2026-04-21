@@ -520,14 +520,27 @@ def _get_sheet():
     """Return the gspread Worksheet, cached for 2 minutes."""
     client = _gspread_client()
     if client is None:
+        st.sidebar.warning("🔴 DEBUG _get_sheet: gspread client is None (missing credentials?)")
         return None
     sheet_id = os.getenv("GOOGLE_SHEET_ID") or st.secrets.get("GOOGLE_SHEET_ID", "")
     if not sheet_id:
+        st.sidebar.warning("🔴 DEBUG _get_sheet: GOOGLE_SHEET_ID is empty")
         return None
     try:
         spreadsheet = client.open_by_key(sheet_id)
-        return spreadsheet.worksheet("claves")
-    except Exception:
+        ws = spreadsheet.worksheet("claves")
+        # Log sheet info + first 3 rows to verify column layout
+        all_vals = ws.get_all_values()
+        st.sidebar.info(
+            f"🟢 DEBUG _get_sheet OK\n"
+            f"Sheet ID: `{sheet_id[:12]}…`\n"
+            f"Rows in sheet: {len(all_vals)}\n"
+            f"Header row: {all_vals[0] if all_vals else 'empty'}\n"
+            f"Row 2 (1st key): {all_vals[1] if len(all_vals) > 1 else 'none'}"
+        )
+        return ws
+    except Exception as e:
+        st.sidebar.error(f"🔴 DEBUG _get_sheet exception: {e}")
         return None
 
 
@@ -575,14 +588,18 @@ def _save_usage_local(usage: dict) -> None:
 def validate_key(key: str) -> str:
     """Return 'ok', 'invalid', or 'expired'. Uses Google Sheets when configured."""
     ws = _get_sheet()
+    st.sidebar.info(f"🔍 DEBUG validate_key: ws={'Sheet OK' if ws else 'None (fallback)'}, key=`{key}`")
     if ws is not None:
         row, usos = _sheet_row_for_key(ws, key)
+        st.sidebar.info(f"🔍 DEBUG _sheet_row_for_key: row={row}, usos={usos}")
         if row is None:
             return "invalid"
         return "ok" if usos > 0 else "expired"
 
     # ── Local fallback ──
-    if key not in _load_valid_keys_local():
+    valid_local = _load_valid_keys_local()
+    st.sidebar.info(f"🔍 DEBUG local fallback: keys.txt has {len(valid_local)} keys, key present={key in valid_local}")
+    if key not in valid_local:
         return "invalid"
     usage = _load_usage_local()
     return "expired" if usage.get(key, 0) >= MAX_USES else "ok"
